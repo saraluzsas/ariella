@@ -34,5 +34,40 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            bash /etc/ariella/setup.sh
-            bash /etc/ariella/deploy.sh
+            if [[ -d ${{ secrets.APP_PATH }}}/repo ]]
+            then
+                cd ${{ secrets.APP_PATH }}/repo
+                git pull
+
+            else
+                cd ${{ secrets.APP_PATH }}
+                git clone https://github.com/saraluzsas/ariella.git repo
+                echo "Please, setup the .env file and firebase keys on /repo folder"
+
+            fi
+
+  deploy:
+    name: Deploy to server
+    runs-on: ubuntu-latest
+    needs:
+      - test
+      - setup
+    steps:
+      - name: Clean instance
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_URL }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            cd ${{ secrets.APP_PATH }}/repo
+
+            # install and build
+
+            npm install
+            npm run build
+
+            # load balancer
+
+            npm i -g pm2
+            pm2 start dist/main.js -n ariella_api
