@@ -34,13 +34,12 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            if [[ -d ${{ secrets.APP_PATH }} ]]
+            if [[ -d ${{ secrets.APP_PATH }}/.git ]]
             then
                 cd ${{ secrets.APP_PATH }}
                 git pull
 
             else
-                mkdir ${{ secrets.APP_PATH }}
                 cd ${{ secrets.APP_PATH }}
 
                 git clone https://github.com/saraluzsas/ariella.git .
@@ -73,7 +72,7 @@ jobs:
 
             npm i -g pm2
 
-            if [ pm2 pid ${{ secrets.APP_PROCESS_NAME }} ]
+            if [[ $(pm2 pid ${{ secrets.APP_PROCESS_NAME }}) ]]
             then
               pm2 restart ${{ secrets.APP_PROCESS_NAME }}
             
