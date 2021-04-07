@@ -1,0 +1,38 @@
+name: Deploy to server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run all test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: "14.x"
+          registry-url: "https://registry.npmjs.org"
+
+      - run: npm install
+      - run: npm run build
+
+  setup:
+    name: Setup instance
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Clean instance
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_URL }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            bash /etc/ariella/setup.sh
+            bash /etc/ariella/deploy.sh
