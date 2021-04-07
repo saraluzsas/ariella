@@ -10,11 +10,7 @@ if (process.env.NODE_ENV !== "production") {
 
 // firebase
 
-import admin from "firebase-admin"
-
-admin.initializeApp({
-    credential: admin.credential.cert(require("../firebase.keys.json"))
-})
+import "./firebase"
 
 // server
 
