@@ -34,14 +34,16 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            if [[ -d ${{ secrets.APP_PATH }}}/repo ]]
+            if [[ -d ${{ secrets.APP_PATH }} ]]
             then
-                cd ${{ secrets.APP_PATH }}/repo
+                cd ${{ secrets.APP_PATH }}
                 git pull
 
             else
+                mkdir ${{ secrets.APP_PATH }}
                 cd ${{ secrets.APP_PATH }}
-                git clone https://github.com/saraluzsas/ariella.git repo
+
+                git clone https://github.com/saraluzsas/ariella.git .
                 echo "Please, setup the .env file and firebase keys on /repo folder"
 
             fi
@@ -53,14 +55,14 @@ jobs:
       - test
       - setup
     steps:
-      - name: Clean instance
+      - name: Build and deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_URL }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            cd ${{ secrets.APP_PATH }}/repo
+            cd ${{ secrets.APP_PATH }}
 
             # install and build
 
@@ -70,4 +72,12 @@ jobs:
             # load balancer
 
             npm i -g pm2
-            pm2 start dist/main.js -n ariella_api
+
+            if [ pm2 pid ${{ secrets.APP_PROCESS_NAME }} ]
+            then
+              pm2 restart ${{ secrets.APP_PROCESS_NAME }}
+            
+            else
+              pm2 start dist/main.js --name ${{ secrets.APP_PROCESS_NAME }} --watch
+
+            fi

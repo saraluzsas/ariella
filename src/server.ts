@@ -16,6 +16,12 @@ export function startServer(port: number) {
     server.use("/user", userRouter)
     server.use("/auth", authRouter)
 
+    server.get("/", function (req, res) {
+        return res
+            .status(200)
+            .send({ message: "todo esta funcionando correctamente" })
+    })
+
     server.use("*", (req, res) => {
         return res
             .status(501)
