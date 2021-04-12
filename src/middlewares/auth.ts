@@ -30,7 +30,10 @@ export function isAuth() {
                 else {
                     return res
                         .status(404)
-                        .send({ message: "el usuario no fue encontrado" })
+                        .send({
+                            message: "el usuario no fue encontrado",
+                            error: true
+                        })
                 }
             }
     
@@ -48,7 +51,10 @@ export function isAuth() {
 
         return res
             .status(401)
-            .send({ message: "se necesita credenciales para acceder a esta ruta", auth: false })
+            .send({ 
+                message: "se necesita credenciales para acceder a esta ruta",
+                error: true
+            })
     }
 }
 
@@ -68,7 +74,10 @@ export function useAuth(...roles: string[]) {
                 else {
                     return res
                         .status(401)
-                        .send({ message: "no tienes los permiso para estar aquí" })
+                        .send({
+                            message: "no tienes los permiso para estar aquí",
+                            error: true,
+                        })
                 }
             }
     
@@ -86,6 +95,9 @@ export function useAuth(...roles: string[]) {
 
         return res
             .status(401)
-            .send({ message: "se necesita credenciales para acceder a esta ruta", auth: false })
+            .send({
+                message: "se necesita credenciales para acceder a esta ruta",
+                error: true,
+            })
     }
 }

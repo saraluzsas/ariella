@@ -2,9 +2,9 @@ import { useDatabase } from "../../database"
 
 export async function listConsigment() {
     const query = `
-        FOR c IN consigments
+        FOR c IN consignments
             SORT c.createdAt
-            RETURN c
+            RETURN UNSET(c, "photo")
     `
 
     const database = useDatabase()

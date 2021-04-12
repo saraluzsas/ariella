@@ -72,11 +72,8 @@ jobs:
 
             npm i -g pm2
 
-            if [[ $(pm2 pid ${{ secrets.APP_PROCESS_NAME }}) ]]
+            if not [[ $(pm2 pid ${{ secrets.APP_PROCESS_NAME }}) ]]
             then
-              pm2 restart ${{ secrets.APP_PROCESS_NAME }}
-            
-            else
-              pm2 start dist/main.js --name ${{ secrets.APP_PROCESS_NAME }} --watch
+              pm2 start dist/main.js --name ${{ secrets.APP_PROCESS_NAME }} --watch -s
 
             fi
