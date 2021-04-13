@@ -58,11 +58,24 @@ consignmentRouter.get("/", async function (req, res, next) {
     }
 })
 
+consignmentRouter.get("/:id", async function (req, res, next) {
+    try {
+        const consignment = req["consignment"] as Consignment
+        delete consignment.photo
+
+        return res.send({ data: consignment })
+    }
+
+    catch (err) {
+        next(err)
+    }
+})
+
 consignmentRouter.get("/:id/photo", async function (req, res, next) {
     try {
-        const consigment = req["consignment"] as Consignment
+        const consignment = req["consignment"] as Consignment
 
-        const data = consigment.photo.match(/data:(?<type>.*);base64,(?<content>.*)/)
+        const data = consignment.photo.match(/data:(?<type>.*);base64,(?<content>.*)/)
         const type = data.groups.type
         const buffer = Buffer.from(data.groups.content, "base64")
 
