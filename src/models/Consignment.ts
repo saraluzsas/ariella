@@ -1,5 +1,5 @@
 export interface ConsignmentDetail {
-    date: Date
+    date: string
     amount: number
 }
 
@@ -10,5 +10,6 @@ export interface Consignment {
     draft: boolean
     note: string
     details: ConsignmentDetail[]
-    createdAt: Date
+
+    createdAt: string
 }

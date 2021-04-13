@@ -15,7 +15,10 @@ userRouter.param("id", async function (req, res, next) {
     else {
         return res
             .status(404)
-            .send({ message: "no se encontró registro con ese id" })
+            .send({
+                message: "no se encontró registro con ese id",
+                error: true,
+            })
     }
 })
 
@@ -45,7 +48,10 @@ userRouter.post("/", async function (req, res, next) {
     else {
         return res
             .status(400)
-            .send({ message: "faltan campos obligatorios" })
+            .send({
+                message: "faltan campos obligatorios",
+                error: true,
+            })
     }
 })
 
