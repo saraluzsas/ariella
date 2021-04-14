@@ -1,4 +1,4 @@
-import { useCollection } from "../../database"
+import { useCollection } from "../../services/database"
 import { User } from "../../models/User"
 
 export async function editUser(id: string, data: User) {
