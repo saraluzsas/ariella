@@ -2,11 +2,11 @@ import { Database } from "arangojs"
 
 export function useDatabase() {
     return new Database({
-        url: process.env.ARIELLA_ARANGO_URL,
-        databaseName: process.env.ARIELLA_ARANGO_DATABASE,
+        url: process.env.ARANGO_URL,
+        databaseName: process.env.ARANGO_DATABASE,
         auth: {
-            username: process.env.ARIELLA_ARANGO_USER,
-            password: process.env.ARIELLA_ARANGO_PASSWORD
+            username: process.env.ARANGO_USER,
+            password: process.env.ARANGO_PASSWORD
         }
     })
 }

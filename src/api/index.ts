@@ -1,4 +1,4 @@
-import { createServer } from "./server"
+import { createServer } from "../server"
 
 // env
 
@@ -7,7 +7,7 @@ dotenv.config()
 
 // firebase
 
-import "./services/firebase"
+import "../services/firebase"
 
 // server
 
