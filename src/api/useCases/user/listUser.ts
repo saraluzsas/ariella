@@ -1,4 +1,4 @@
-import { useDatabase } from "../../database"
+import { useDatabase } from "../../services/database"
 
 export async function listUser() {
     try {

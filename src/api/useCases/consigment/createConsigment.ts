@@ -1,4 +1,4 @@
-import { useCollection } from "../../database"
+import { useCollection } from "../../services/database"
 import { Consignment } from "../../models/Consignment"
 
 export async function createConsigment(consigment: Consignment) {

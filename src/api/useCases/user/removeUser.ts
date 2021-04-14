@@ -1,4 +1,4 @@
-import { useCollection } from "../../database"
+import { useCollection } from "../../services/database"
 
 import admin from "firebase-admin"
 
