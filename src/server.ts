@@ -38,6 +38,9 @@ export function startServer(port: number) {
     })
 
     server.listen(port, function() {
-        console.log(`Server running on port ${port}`)
+        const now = new Date()
+        const hour = now.toLocaleTimeString()
+
+        console.log(`[${hour}] Ariella API on port ${port}`)
     })
 }

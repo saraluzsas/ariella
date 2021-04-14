@@ -57,7 +57,8 @@ consignmentRouter.post("/", useAuth(Roles.store), async function (req, res, next
 
 consignmentRouter.get("/", useAuth(Roles.admin), async function (req, res, next) {
     try {
-        const result = await queryConsignment(req.body)
+        const result = await queryConsignment(req.query)
+
         return res.send({ data: result })
     }
 
