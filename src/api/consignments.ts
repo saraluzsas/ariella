@@ -1,8 +1,11 @@
 import { Router } from "express"
+import { isAuth, useAuth } from "../middlewares/auth"
 import { Consignment } from "../models/Consignment"
+import { Roles } from "../models/User"
 import { createConsigment } from "../useCases/consigment/createConsigment"
 import { findConsignment } from "../useCases/consigment/findConsignment"
-import { listConsigment } from "../useCases/consigment/listConsigment"
+import { listConsigmentPerAuthor } from "../useCases/consigment/listConsigment"
+import { queryConsignment } from "../useCases/consigment/queryConsignment"
 
 export const consignmentRouter = Router()
 
@@ -36,10 +39,15 @@ consignmentRouter.param("id", async function (req, res, next) {
     }
 })
 
-consignmentRouter.post("/", async function (req, res, next) {
+consignmentRouter.post("/", useAuth(Roles.store), async function (req, res, next) {
     try {
-        const id = await createConsigment({ ...req.body, createdAt: new Date() })
-        return res.send({ data: { id } })
+        const author = req["user"]._key
+        const id = await createConsigment({ ...req.body, author, createdAt: new Date() })
+
+        return res.send({
+            data: { id },
+            message: "consignación registrada",
+        })
     }
 
     catch (err) {
@@ -47,10 +55,10 @@ consignmentRouter.post("/", async function (req, res, next) {
     }
 })
 
-consignmentRouter.get("/", async function (req, res, next) {
+consignmentRouter.get("/", useAuth(Roles.admin), async function (req, res, next) {
     try {
-        const consigments = await listConsigment()
-        return res.send({ data: consigments })
+        const result = await queryConsignment(req.body)
+        return res.send({ data: result })
     }
 
     catch (err) {
@@ -58,7 +66,7 @@ consignmentRouter.get("/", async function (req, res, next) {
     }
 })
 
-consignmentRouter.get("/:id", async function (req, res, next) {
+consignmentRouter.get("/:id", useAuth(Roles.admin, Roles.store), async function (req, res, next) {
     try {
         const consignment = req["consignment"] as Consignment
         delete consignment.photo
@@ -71,7 +79,7 @@ consignmentRouter.get("/:id", async function (req, res, next) {
     }
 })
 
-consignmentRouter.get("/:id/photo", async function (req, res, next) {
+consignmentRouter.get("/:id/photo", useAuth(Roles.admin, Roles.store), async function (req, res, next) {
     try {
         const consignment = req["consignment"] as Consignment
 
@@ -85,6 +93,19 @@ consignmentRouter.get("/:id/photo", async function (req, res, next) {
         })
 
         res.end(buffer)
+    }
+
+    catch (err) {
+        next(err)
+    }
+})
+
+consignmentRouter.get("/author/:author", isAuth(), async function (req, res, next) {
+    try {
+        const author = req.params.author.toString()
+        const consignments = await listConsigmentPerAuthor(author)
+
+        return res.send({ data: consignments })
     }
 
     catch (err) {

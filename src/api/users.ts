@@ -22,7 +22,7 @@ userRouter.param("id", async function (req, res, next) {
     }
 })
 
-userRouter.use(useAuth(Roles.developer, Roles.developer))
+userRouter.use(useAuth(Roles.admin))
 
 userRouter.post("/", async function (req, res, next) {
     const { nickname, role, phone } = req.body
@@ -39,7 +39,7 @@ userRouter.post("/", async function (req, res, next) {
             const id = await createUser(user)
             return res.send({ data: { id } })
         }
-    
+
         catch (err) {
             next(err)
         }
@@ -58,6 +58,8 @@ userRouter.post("/", async function (req, res, next) {
 userRouter.get("/", async function (req, res, next) {
     try {
         const users = await listUser()
+        delete users[req["user"]._key]
+
         return res.send({ data: users })
     }
 
