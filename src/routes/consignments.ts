@@ -5,7 +5,7 @@ import { Roles } from "../models/User"
 import { createConsigment } from "../useCases/consigment/createConsigment"
 import { findConsignment } from "../useCases/consigment/findConsignment"
 import { listConsigmentPerAuthor } from "../useCases/consigment/listConsigment"
-import { queryConsignment } from "../useCases/consigment/queryConsignment"
+import { exportConsignment, queryConsignment } from "../useCases/consigment/queryConsignment"
 
 export const consignmentRouter = Router()
 
@@ -58,8 +58,25 @@ consignmentRouter.post("/", useAuth(Roles.store), async function (req, res, next
 consignmentRouter.get("/", useAuth(Roles.admin), async function (req, res, next) {
     try {
         const result = await queryConsignment(req.query)
-
         return res.send({ data: result })
+    }
+
+    catch (err) {
+        next(err)
+    }
+})
+
+consignmentRouter.get("/export", async function (req, res, next) {
+    try {
+        const stream = await exportConsignment(req.query)
+
+        stream.on("data", function (data) {
+            res.write(data)
+        })
+
+        stream.on("end", function () {
+            res.status(200).send()
+        })
     }
 
     catch (err) {

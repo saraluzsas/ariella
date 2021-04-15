@@ -1,40 +1,98 @@
 import { useDatabase } from "../../services/database"
 
-export async function queryConsignment(constraints: any) {
-    try {
-        const query = `
-            FOR c IN consignments
-                COLLECT date = DATE_FORMAT(c.createdAt, "%yyyy-%mm-%dd") INTO list = c
-                
-                LET from = IS_DATESTRING(@constraints.from) ? @constraints.from : date
-                LET to = IS_DATESTRING(@constraints.to) ? @constraints.to : date
+import * as csv from "fast-csv"
 
+export async function exportConsignment(filters: any) {
+    const query = `
+        FOR c IN consignments
+            LET date = DATE_FORMAT(c.createdAt, "%yyyy-%mm-%dd")
+            
+            LET from = IS_DATESTRING(@filters.from) ? @filters.from : date
+            LET to = IS_DATESTRING(@filters.to) ? @filters.to : date
+
+            FILTER DATE_DIFF(from, date, "d") >= 0
+            FILTER DATE_DIFF(to, date, "d") <= 0
+
+            LET user = DOCUMENT("users", c.author)
+            LET search = LOWER(@filters.search)
+
+            FILTER NOT LENGTH(search)
+                OR CONTAINS(user.nickname, search)
+                OR CONTAINS(c.note, search)
+                OR CONTAINS(c.total, search)
+
+            SORT DATE_TIMESTAMP(date) DESC
+            
+            RETURN {
+                id: c._key,
+                author: user.nickname,
+                note: c.note,
+                total: c.total,
+                createdAt: date
+            }
+    `
+
+    const database = useDatabase()
+    const result = await database.query(query, { filters })
+
+    const headers = ["id", "author", "note", "total", "createdAt"]
+
+    const stream = csv.format({ delimiter: ";", headers })
+
+    while (result.hasNext) {
+        stream.write(await result.next())
+    }
+
+    stream.end()
+
+    return stream
+}
+
+export async function queryConsignment(filters: any) {
+    const query = `
+        LIMIT TO_NUMBER(@filters.page), 5
+
+        LET consignments = (
+            FOR c IN consignments
+                COLLECT date = DATE_FORMAT(c.createdAt, "%yyyy-%mm-%dd") INTO list = UNSET(c, "photo")
+                
+                LET from = IS_DATESTRING(@filters.from) ? @filters.from : date
+                LET to = IS_DATESTRING(@filters.to) ? @filters.to : date
+            
                 FILTER DATE_DIFF(from, date, "d") >= 0
                 FILTER DATE_DIFF(to, date, "d") <= 0
-
+            
                 SORT DATE_TIMESTAMP(date) DESC
-                LIMIT (TO_NUMBER(@constraints.page) * 2), 2
                 
                 LET content = (
                     FOR i IN list
                         LET user = DOCUMENT("users", i.author)
+                        LET search = LOWER(@filters.search)
+
+                        FILTER NOT LENGTH(search)
+                            OR CONTAINS(i.note, search)
+                            OR CONTAINS(i.total, search)
+                            OR CONTAINS(user.nickname, search)
+
                         RETURN MERGE(i, { author: user.nickname })
                 )
+
+                FILTER LENGTH(content)
                 
                 RETURN {
-                    date: date,
+                    title: date,
                     content: content
                 }
-        `
+        )
+        
+        RETURN {
+            pages: CEIL(LENGTH(consignments) / 5),
+            sections: consignments
+        }
+    `
 
-        const database = useDatabase()
-        const result = await database.query(query, { constraints })
+    const database = useDatabase()
+    const result = await database.query(query, { filters })
 
-        return await result.all()
-    }
-
-    catch (err) {
-        console.error(err)
-        return []
-    }
+    return await result.next()
 } 
