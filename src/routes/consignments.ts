@@ -97,7 +97,7 @@ consignmentRouter.get("/:id", useAuth(Roles.admin, Roles.store), async function 
     }
 })
 
-consignmentRouter.get("/:id/photo", useAuth(Roles.admin, Roles.store), async function (req, res, next) {
+consignmentRouter.get("/:id/photo", async function (req, res, next) {
     try {
         const consignment = req["consignment"] as Consignment
 

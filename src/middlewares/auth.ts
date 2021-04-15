@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express"
-import { findUser } from "../useCases/user/findUser"
+import { findUserByFirebaseId } from "../useCases/user/findUser"
 
 import admin from "firebase-admin"
 
@@ -11,7 +11,7 @@ async function extractUserFromHeader(header: string) {
     
     const payload = await auth.verifyIdToken(token, true)
 
-    return await findUser(payload.uid)
+    return await findUserByFirebaseId(payload.uid)
 }
 
 export function isAuth() {
