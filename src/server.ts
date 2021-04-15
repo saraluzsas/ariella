@@ -12,7 +12,7 @@ import { consignmentRouter } from "./routes/consignments"
 export function createServer() {
     const server = express()
 
-    server.use(json({ limit: "20mb" }))
+    server.use(json({ limit: "25mb" }))
     server.use(cors())
 
     server.use("/user", userRouter)
