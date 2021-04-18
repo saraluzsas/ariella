@@ -5,7 +5,6 @@ import { createUser } from "../useCases/user/createUser"
 import { editUser } from "../useCases/user/editUser"
 import { findUser } from "../useCases/user/findUser"
 import { listUser } from "../useCases/user/listUser"
-import { removeUser } from "../useCases/user/removeUser"
 
 export const userRouter = Router()
 
@@ -71,17 +70,6 @@ userRouter.get("/", async function (req, res, next) {
 userRouter.get("/:id", async function (req, res) {
     const user = await findUser(req.params.id)
     return res.send({ data: user })
-})
-
-userRouter.delete("/:id", async function (req, res, next) {
-    try {
-        await removeUser(req.params.id)
-        return res.sendStatus(200)
-    }
-    
-    catch (err) {
-        next(err)
-    }
 })
 
 userRouter.put("/:id", async function (req, res, next) {
