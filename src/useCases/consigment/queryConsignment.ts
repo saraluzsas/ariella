@@ -50,12 +50,10 @@ export async function exportConsignment(filters: any) {
 
 export async function queryConsignment(filters: any) {
     const query = `
-        LIMIT TO_NUMBER(@filters.page), 5
-
         LET consignments = (
             FOR c IN consignments
                 COLLECT date = DATE_FORMAT(c.createdAt, "%yyyy-%mm-%dd") INTO list = UNSET(c, "photo")
-                
+
                 LET from = IS_DATESTRING(@filters.from) ? @filters.from : date
                 LET to = IS_DATESTRING(@filters.to) ? @filters.to : date
             
@@ -86,8 +84,12 @@ export async function queryConsignment(filters: any) {
         )
         
         RETURN {
-            pages: CEIL(LENGTH(consignments) / 5),
-            sections: consignments
+            pages: CEIL(LENGTH(consignments) / 3),
+            sections: (
+                FOR c IN consignments
+                    LIMIT TO_NUMBER(@filters.page) * 3, 3
+                    RETURN c
+            )
         }
     `
 
