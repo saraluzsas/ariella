@@ -97,4 +97,4 @@ export async function queryConsignment(filters: any) {
     const result = await database.query(query, { filters })
 
     return await result.next()
-} 
+}

@@ -36,7 +36,10 @@ userRouter.post("/", async function (req, res, next) {
             }
 
             const id = await createUser(user)
-            return res.send({ data: { id } })
+            return res.send({
+                message: "usuario registrado correctamente",
+                data: { id }
+            })
         }
 
         catch (err) {
@@ -75,7 +78,9 @@ userRouter.get("/:id", async function (req, res) {
 userRouter.put("/:id", async function (req, res, next) {
     try {
         await editUser(req.params.id, req.body)
-        return res.sendStatus(200)
+        return res
+            .status(200)
+            .send({ message: "usuario editado correctamente" })
     }
 
     catch (err) {

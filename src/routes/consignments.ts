@@ -6,6 +6,7 @@ import { createConsigment } from "../useCases/consigment/createConsigment"
 import { findConsignment } from "../useCases/consigment/findConsignment"
 import { listConsigmentPerAuthor } from "../useCases/consigment/listConsigment"
 import { exportConsignment, queryConsignment } from "../useCases/consigment/queryConsignment"
+import { removeConsignment } from "../useCases/consigment/removeConsignment"
 
 export const consignmentRouter = Router()
 
@@ -90,6 +91,19 @@ consignmentRouter.get("/:id", useAuth(Roles.admin, Roles.store), async function 
         delete consignment.photo
 
         return res.send({ data: consignment })
+    }
+
+    catch (err) {
+        next(err)
+    }
+})
+
+consignmentRouter.delete("/:id", useAuth(Roles.admin), async function (req, res, next) {
+    try {
+        const id = req.params.id.toString()
+        await removeConsignment(id)
+
+        return res.send({ message: "consignación eliminada" })
     }
 
     catch (err) {
