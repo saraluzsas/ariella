@@ -4,32 +4,40 @@ import * as csv from "fast-csv"
 
 export async function exportConsignment(filters: any) {
     const query = `
-        FOR c IN consignments
-            LET date = DATE_FORMAT(c.createdAt, "%yyyy-%mm-%dd")
+        LET details = (
+            FOR c IN consignments
+                LET date = DATE_FORMAT(c.createdAt, "%yyyy-%mm-%dd")
+                
+                LET from = IS_DATESTRING(@filters.from) ? @filters.from : date
+                LET to = IS_DATESTRING(@filters.to) ? @filters.to : date
             
-            LET from = IS_DATESTRING(@filters.from) ? @filters.from : date
-            LET to = IS_DATESTRING(@filters.to) ? @filters.to : date
-
-            FILTER DATE_DIFF(from, date, "d") >= 0
-            FILTER DATE_DIFF(to, date, "d") <= 0
-
-            LET user = DOCUMENT("users", c.author)
-            LET search = LOWER(@filters.search)
-
-            FILTER NOT LENGTH(search)
-                OR CONTAINS(user.nickname, search)
-                OR CONTAINS(c.note, search)
-                OR CONTAINS(c.total, search)
-
-            SORT DATE_TIMESTAMP(date) DESC
+                FILTER DATE_DIFF(from, date, "d") >= 0
+                FILTER DATE_DIFF(to, date, "d") <= 0
             
-            RETURN {
-                id: c._key,
-                author: user.nickname,
-                note: c.note,
-                total: c.total,
-                createdAt: date
-            }
+                LET user = DOCUMENT("users", c.author)
+                LET search = LOWER(@filters.search)
+            
+                FILTER NOT LENGTH(search)
+                    OR CONTAINS(user.nickname, search)
+                    OR CONTAINS(c.note, search)
+                    OR CONTAINS(c.total, search)
+            
+                SORT DATE_TIMESTAMP(date) DESC
+                
+                RETURN (
+                    FOR d IN c.details
+                        RETURN {
+                            id: c._key,
+                            author: user.nickname,
+                            amount: d.amount,
+                            date: d.date,
+                            note: c.note
+                        }
+                )
+        )
+        
+        FOR d IN details[**]
+            RETURN d
     `
 
     const database = useDatabase()
