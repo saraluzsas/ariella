@@ -43,7 +43,7 @@ export async function exportConsignment(filters: any) {
     const database = useDatabase()
     const result = await database.query(query, { filters })
 
-    const headers = ["id", "author", "note", "total", "createdAt"]
+    const headers = ["id", "author", "amount", "date", "note"]
 
     const stream = csv.format({ delimiter: ";", headers })
 
@@ -92,10 +92,10 @@ export async function queryConsignment(filters: any) {
         )
         
         RETURN {
-            pages: CEIL(LENGTH(consignments) / 3),
+            pages: CEIL(LENGTH(consignments) / 2),
             sections: (
                 FOR c IN consignments
-                    LIMIT TO_NUMBER(@filters.page) * 3, 3
+                    LIMIT TO_NUMBER(@filters.page) * 2, 2
                     RETURN c
             )
         }
